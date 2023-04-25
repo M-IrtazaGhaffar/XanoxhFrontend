@@ -62,7 +62,7 @@ function ResponsiveDrawer(props) {
           },
           {
             route: "email",
-            name: "Send Email",
+            name: "Contact Us",
           },
           {
             route: "report",
@@ -117,8 +117,8 @@ function ResponsiveDrawer(props) {
             name: "Settings",
           },
           {
-            route: "contact",
-            name: "Contact us",
+            route: "notifications",
+            name: "Notifications",
           },
           {
             route: "payments",
@@ -243,20 +243,6 @@ function ResponsiveDrawer(props) {
       >
         <Toolbar />
         <Outlet />
-      </Box>
-      <Box
-        sx={{
-          position: "absolute",
-          bottom: "0px",
-          bgcolor: "black",
-          width: "100%",
-          textAlign: "center",
-          color: "whitesmoke",
-        }}
-      >
-        <Typography variant="caption">
-          Made By ByteWiseCode Developers
-        </Typography>
       </Box>
     </Box>
   );

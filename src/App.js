@@ -9,7 +9,7 @@ import Dashboard from "./pages/Dashboard";
 import Status from "./pages/Status";
 import Report from "./pages/Report";
 import Email from "./pages/Email";
-import Contact from "./pages/Contact";
+import Notifications from "./pages/Notifications";
 import Payments from "./pages/Payments";
 import Settings from "./pages/Settings";
 import Info from "./pages/Info";
@@ -30,7 +30,7 @@ export default function MyApp() {
             <Route exact path="/dashboard/report" element={<Report />} />
             <Route exact path="/dashboard/email" element={<Email />} />
             <Route exact path="/dashboard/status" element={<Status />} />
-            <Route exact path="/dashboard/contact" element={<Contact />} />
+            <Route exact path="/dashboard/notifications" element={<Notifications />} />
             <Route exact path="/dashboard/info" element={<Info />} />
             <Route exact path="/dashboard/settings" element={<Settings />} />
             <Route exact path="/dashboard/payments" element={<Payments />} />
