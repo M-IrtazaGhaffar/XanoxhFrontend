@@ -4,8 +4,16 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import SignIn from "./pages/Signin";
 import { createTheme } from "@mui/material";
 import { ThemeProvider } from "styled-components";
-import Dashboard from "./pages/Dashboard";
 import Create from "./pages/Create";
+import Dashboard from "./pages/Dashboard";
+import Status from "./pages/Status";
+import Report from "./pages/Report";
+import Email from "./pages/Email";
+import Contact from "./pages/Contact";
+import Payments from "./pages/Payments";
+import Settings from "./pages/Settings";
+import Info from "./pages/Info";
+import Forgot from "./pages/Forgot";
 
 export default function MyApp() {
   const theme = createTheme();
@@ -15,8 +23,17 @@ export default function MyApp() {
       <BrowserRouter>
         <Routes>
           <Route exact path="/signin" element={<SignIn />} />
+          <Route exact path="/forgot" element={<Forgot />} />
           <Route exact path="/dashboard" element={<Dashboard />} >
-            <Route exact path="/dashboard/" element={<Create />} />
+            <Route index path="/dashboard/" element={<Create />} />
+            <Route exact path="/dashboard/status" element={<Status />} />
+            <Route exact path="/dashboard/report" element={<Report />} />
+            <Route exact path="/dashboard/email" element={<Email />} />
+            <Route exact path="/dashboard/status" element={<Status />} />
+            <Route exact path="/dashboard/contact" element={<Contact />} />
+            <Route exact path="/dashboard/info" element={<Info />} />
+            <Route exact path="/dashboard/settings" element={<Settings />} />
+            <Route exact path="/dashboard/payments" element={<Payments />} />
           </Route>
         </Routes>
       </BrowserRouter>
