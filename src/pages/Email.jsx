@@ -1,45 +1,59 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import {
+  Alert,
+  AlertTitle,
   Box,
   Button,
-  FormControl,
-  FormHelperText,
-  FormLabel,
   IconButton,
-  Menu,
+  Snackbar,
   TextField,
-  TextareaAutosize,
   Typography,
-  useMediaQuery,
 } from "@mui/material";
 import Splash from "../components/Splash";
 
 function Email() {
   const [Loading, setLoading] = useState(1);
+  const [Open, setOpen] = useState(0);
+  const handleClick = () => {
+    setOpen(!Open);
+  };
+
   const handleSubmit = (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    console.log({
-      name: data.get("name"),
-      subject: data.get("subject"),
-      message: data.get("message"),
-    });
+    const name = data.get("name");
+    const subject = data.get("subject");
+    const message = data.get("message");
+    console.log(name + " " + subject + " " + message);
+    if (name === "" || subject === "" || message === "") {
+      setOpen(1);
+    }
   };
 
   useEffect(() => {
     setTimeout(() => {
-      setLoading(0)
+      setLoading(0);
     }, 3000);
-  }, [])
-  
+  }, []);
 
   return (
     <Box>
       {Loading ? (
         <Splash />
       ) : (
-        <Box>
+        <Box
+          sx={{
+            height: "100%",
+            // overflowY: "scroll",
+          }}
+        >
+          <Snackbar open={Open} onClose={handleClick}>
+            <Alert onClose={() => {}} onClick={handleClick} severity="error">
+              <AlertTitle>Error</AlertTitle>
+              This is an error alert — <strong>check it out!</strong>
+            </Alert>
+          </Snackbar>
           <Typography variant="h4">Get in touch with Us</Typography>
           <Typography variant="caption">
             Don't try to go against our security guidelines and authentications.
@@ -55,41 +69,54 @@ function Email() {
             noValidate
             sx={{
               mt: 2,
-              width: {
-                md: '100%',
-                lg: '50%'
-              }
             }}
             display="flex"
             alignItems="flex-start"
             justifyContent="center"
             flexDirection="column"
           >
-            <TextField
-              name="name"
-              margin="normal"
-              required
-              label="Name"
-              autoComplete="off"
-              autoFocus
-              fullWidth
+            <Box
+              sx={{
+                mt: 2,
+                width: {
+                  md: "100%",
+                  lg: "50%",
+                },
+              }}
+            >
+              <TextField
+                name="name"
+                margin="normal"
+                required
+                label="Name"
+                autoComplete="off"
+                autoFocus
+                fullWidth
+              />
+              <TextField
+                name="subject"
+                margin="normal"
+                required
+                label="Subject"
+                autoComplete="off"
+                autoFocus
+                fullWidth
+              />
+            </Box>
+            <label style={{ fontSize: "13px" }}>
+              Please explain yourself here and then submit.
+            </label>
+            <textarea
+              name="message"
+              placeholder="Explain here..."
+              style={{
+                width: "100%",
+                padding: "13px",
+                resize: "none",
+                margin: "5px 0",
+              }}
+              rows={30}
             />
-            <TextField
-              name="subject"
-              margin="normal"
-              required
-              label="Subject"
-              autoComplete="off"
-              autoFocus
-              fullWidth
-            />
-            <FormControl>
-              <FormLabel sx={{ fontSize: "13px" }}>Message</FormLabel>
-              <TextareaAutosize minRows={10} cols={ 42} name="message" />
-              <FormHelperText>
-                We'll contact you as soon as possible!
-              </FormHelperText>
-            </FormControl>
             <Button
               type="submit"
               variant="contained"

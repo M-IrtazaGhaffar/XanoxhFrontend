@@ -14,6 +14,7 @@ import Payments from "./pages/Payments";
 import Settings from "./pages/Settings";
 import Info from "./pages/Info";
 import Forgot from "./pages/Forgot";
+import Protected from "./pages/Protected";
 
 export default function MyApp() {
   const theme = createTheme();
@@ -24,7 +25,7 @@ export default function MyApp() {
         <Routes>
           <Route exact path="/signin" element={<SignIn />} />
           <Route exact path="/forgot" element={<Forgot />} />
-          <Route exact path="/dashboard" element={<Dashboard />} >
+          <Route exact path="/dashboard" element={<Protected Component={Dashboard} />} >
             <Route index path="/dashboard/" element={<Create />} />
             <Route exact path="/dashboard/status" element={<Status />} />
             <Route exact path="/dashboard/report" element={<Report />} />

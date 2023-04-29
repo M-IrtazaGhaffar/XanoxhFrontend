@@ -48,8 +48,8 @@ export default function SignIn() {
 
     if (true) {
       setTimeout(() => {
-        navigate("/dashboard");
-      }, 10000);
+        navigate("/dashboard/");
+      }, 1000);
     }
   };
 
