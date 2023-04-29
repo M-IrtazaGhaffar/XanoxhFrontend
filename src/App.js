@@ -15,6 +15,7 @@ import Settings from "./pages/Settings";
 import Info from "./pages/Info";
 import Forgot from "./pages/Forgot";
 import Protected from "./pages/Protected";
+import Notfound from "./pages/Notfound";
 
 export default function MyApp() {
   const theme = createTheme();
@@ -35,7 +36,9 @@ export default function MyApp() {
             <Route exact path="/dashboard/info" element={<Info />} />
             <Route exact path="/dashboard/settings" element={<Settings />} />
             <Route exact path="/dashboard/payments" element={<Payments />} />
+            <Route path="/dashboard/*" element={<Notfound />} />
           </Route>
+            <Route path="*" element={<Notfound />} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>

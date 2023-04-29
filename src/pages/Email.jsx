@@ -115,7 +115,7 @@ function Email() {
                 resize: "none",
                 margin: "5px 0",
               }}
-              rows={30}
+              rows={20}
             />
             <Button
               type="submit"
