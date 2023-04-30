@@ -53,19 +53,27 @@ function Info() {
       ) : (
         <Box>
           <HandleDate />
-          <Typography variant="h4">
-            General
-          </Typography>
+          <Typography variant="h4">General</Typography>
           <Typography variant="body2">
-            Be patient! All of your data is secure and is only available for you to view. Change your Information by going into <Link to='/dashboard/settings' style={{ color: 'gray'}}>Settings</Link>.
+            Be patient! All of your data is secure and is only available for you
+            to view. Change your Information by going into{" "}
+            <Link to="/dashboard/settings" style={{ color: "gray" }}>
+              Settings
+            </Link>
+            .
           </Typography>
-          <Box sx={{
-            pt: 5,
-            px: {
-              md: 3,
-              lg: 5
-            }
-          }} display="flex" gap={2} flexDirection="column">
+          <Box
+            sx={{
+              pt: 5,
+              px: {
+                md: 3,
+                lg: 5,
+              },
+            }}
+            display="flex"
+            gap={2}
+            flexDirection="column"
+          >
             <Typography display="flex" justifyContent="space-between">
               <Typography>Name</Typography> {Data.name}
             </Typography>
