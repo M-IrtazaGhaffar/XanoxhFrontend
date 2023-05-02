@@ -27,12 +27,13 @@ function Create() {
   const [Type, setType] = useState("");
   const [Data, setData] = useState({
     clothid: "",
-    marketerid: "",
+    marketerid: "1",
     client: "",
     paymentnumber: "",
     address: "",
     quantity: "",
     price: "",
+    marketerpayment: 0,
     desc: "",
     length: "",
     chest: "",
@@ -185,7 +186,7 @@ function Create() {
       Data.daman === "" ||
       Data.desc === "" ||
       Data.length === "" ||
-      // Data.marketerid === "" ||
+      Data.marketerid === "" ||
       Data.paymentnumber === "" ||
       Data.price === 0 ||
       Data.quantity === 0 ||
@@ -195,8 +196,10 @@ function Create() {
       Data.waist === ""
     ) {
       setOpen(true);
+      console.log(Data);
     } else {
       try {
+        console.log(Data);
         setCP(1);
         const fetch = await axios.post(`${URL}/createOrder`, Data);
         if (fetch.status === 200) {
@@ -204,11 +207,16 @@ function Create() {
         }
         console.log(fetch);
         setCP(0);
-        // setSubmit(1);
-        // setOpen1(1);
+        if (fetch.status === 200) {
+          setSubmit(1);
+          setOpen1(1);
+        } else {
+          setErrData(fetch.data)
+          setError(1);
+        }
       } catch (error) {
         console.log(error);
-        // setErr
+        setErrData(error.message)
         setError(1);
       }
     }
@@ -312,14 +320,22 @@ function Create() {
               <TextField
                 name="client"
                 label="Client Name"
-                onChange={handleData}
+                onChange={(e) =>
+                  setData({ ...Data, [e.target.name]: e.target.value })
+                }
               />
               <TextField
                 name="paymentnumber"
                 label="(Payment / Account) No."
                 onChange={handleData}
               />
-              <TextField name="address" label="Address" onChange={handleData} />
+              <TextField
+                name="address"
+                label="Address"
+                onChange={(e) =>
+                  setData({ ...Data, [e.target.name]: e.target.value })
+                }
+              />
               <TextField
                 name="quantity"
                 label="Quantity"
@@ -463,7 +479,9 @@ function Create() {
                 margin: "20px 0 0 0 ",
               }}
               rows={10}
-              onChange={handleData}
+              onChange={(e) =>
+                setData({ ...Data, [e.target.name]: e.target.value })
+              }
             />
             <Box py={1}>
               <Typography variant="body2" m={1}>
@@ -477,11 +495,17 @@ function Create() {
                 value={Data.account}
                 onChange={(e, newValue) => {
                   const realValue = newValue.split(" ");
-                  setData({ ...Data, clothid: realValue[0] });
+                  console.log(realValue);
+                  // setData({ ...Data, clothid: realValue[0] });
+                  Data.clothid = realValue[0];
                   let temp = ClothID.filter((item) => {
                     return item._id === realValue[0];
                   });
                   setSelected(temp);
+                  setData({
+                    ...Data,
+                    marketerpayment: Selected[0].marketerpayment,
+                  });
                   console.log(Selected);
                 }}
                 sx={{ minWidth: "150px" }}
