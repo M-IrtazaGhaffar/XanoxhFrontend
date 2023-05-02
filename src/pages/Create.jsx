@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from "react";
 import Splash from "../components/Splash";
 import {
+  Alert,
+  AlertTitle,
+  Autocomplete,
   Box,
   Button,
   Chip,
   CircularProgress,
   List,
-  MenuItem,
   Paper,
-  Select,
+  Snackbar,
   Table,
   TableBody,
   TableCell,
@@ -18,6 +20,8 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import axios from "axios";
+import { URL } from "../Config";
 
 function Create() {
   const [Type, setType] = useState("");
@@ -30,18 +34,37 @@ function Create() {
     quantity: "",
     price: "",
     desc: "",
-    length: 0,
-    chest: 0,
-    waist: 0,
-    daman: 0,
-    sleeves: 0,
-    shoulders: 0,
-    colloar: 0,
-    armhole: 0,
+    length: "",
+    chest: "",
+    waist: "",
+    daman: "",
+    sleeves: "",
+    shoulders: "",
+    colloar: "",
+    armhole: "",
     type: Type,
+    account: "",
+    token:
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjoiaXJ0YXphZ2hhZmZhckBnbWFpbC5jb20iLCJpYXQiOjE2ODMwNTQwMTQsImV4cCI6MTY4MzE0MDQxNH0.ZNAknglcKMaaRFJWJb545_LW6HHxB6s47RaVDU4Xt4k",
   });
 
-  const [Loading, setLoading] = useState(1);
+  const [Open, setOpen] = useState(0);
+  const [Open1, setOpen1] = useState(0);
+  const handleClick = () => {
+    setOpen(!Open);
+  };
+  const handleClick1 = () => {
+    setOpen1(!Open1);
+  };
+  const handleClick2 = () => {
+    setError(!Error);
+  };
+  const [Loading, setLoading] = useState(0);
+  const [Error, setError] = useState(0);
+  const [ErrData, setErrData] = useState("");
+  const [CP, setCP] = useState(0);
+  const [Submit, setSubmit] = useState(0);
+  const [Selected, setSelected] = useState([{}]);
   const [Note, setNote] = useState([
     "Make sure your client is real and authentic to purchase",
     "Verify the payment method type",
@@ -51,84 +74,78 @@ function Create() {
     "You can also proceed with custom details even",
     "Check again before ordering",
   ]);
-  const [ClothID, setClothID] = useState([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+  const [ClothID, setClothID] = useState([{}]);
   const handleData = (e) => {
-    setData({ ...Data, [e.target.name]: e.target.value });
+    if (e.target.name === "price" || "quantity")
+      setData({ ...Data, [e.target.name]: parseInt(e.target.value) });
+    else setData({ ...Data, [e.target.name]: e.target.value });
   };
 
   const [Sizes, setSizes] = useState([
     {
       name: "Small",
       size: {
-        length: 39,
-        chest: 21.5,
-        waist: 22,
-        daman: 22.5,
-        sleeves: 23.5,
-        shoulders: 17.5,
-        colloar: 14.5,
-        armhole: 9.5,
+        length: "39",
+        chest: "21.5",
+        waist: "22",
+        daman: "22.5",
+        sleeves: "23.5",
+        shoulders: "17.5",
+        colloar: "14.5",
+        armhole: "9.5",
       },
     },
     {
       name: "Medium",
       size: {
-        length: 41,
-        chest: 22.5,
-        waist: 23,
-        daman: 23.5,
-        sleeves: 24.5,
-        shoulders: 14.5,
-        colloar: 15.5,
-        armhole: 10.5,
+        length: "41",
+        chest: "22.5",
+        waist: "23",
+        daman: "23.5",
+        sleeves: "24.5",
+        shoulders: "18.5",
+        colloar: "15.5",
+        armhole: "10.5",
       },
     },
     {
       name: "Large",
       size: {
-        length: 43,
-        chest: 23.5,
-        waist: 24,
-        daman: 25.5,
-        sleeves: 25.5,
-        shoulders: 19.5,
-        colloar: 16.5,
-        armhole: 11.5,
+        length: "43",
+        chest: "23.5",
+        waist: "24",
+        daman: "24.5",
+        sleeves: "25.5",
+        shoulders: "19.5",
+        colloar: "16.5",
+        armhole: "11.5",
       },
     },
     {
       name: "xLarge",
       size: {
-        length: 45,
-        chest: 24.5,
-        waist: 25,
-        daman: 26.5,
-        sleeves: 26.5,
-        shoulders: 20.5,
-        colloar: 17.5,
-        armhole: 12.5,
+        length: "45",
+        chest: "24.5",
+        waist: "25",
+        daman: "25.5",
+        sleeves: "26.5",
+        shoulders: "20.5",
+        colloar: "17.5",
+        armhole: "12.5",
       },
     },
   ]);
 
   const handleType = (size) => {
-    var n = 0;
-    if (size === "small") setType("small");
-    if (size === "medium") {
-      setType("medium");
-      n = 1;
-    }
-    if (size === "large") {
-      setType("large");
-      n = 2;
-    }
-    if (size === "xlarge") {
-      setType("xlarge");
-      n = 3;
-    }
-    if (size === "custom") {
-      setType("custom");
-    }
+    var n = -1;
+    setType(size);
+    Data.type = size;
+    if (size === "small") n = 0;
+    if (size === "medium") n = 1;
+    if (size === "large") n = 2;
+    if (size === "xlarge") n = 3;
+
+    if (size === "custom") n = 0;
     Data.length = Sizes[n].size.length;
     Data.chest = Sizes[n].size.chest;
     Data.waist = Sizes[n].size.waist;
@@ -139,15 +156,62 @@ function Create() {
     Data.armhole = Sizes[n].size.armhole;
   };
 
+  const fetchData = async () => {
+    // Fetch Stock
+    const fetch = await axios.post(`${URL}/stock`, {
+      token:
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjoiaXJ0YXphZ2hhZmZhckBnbWFpbC5jb20iLCJpYXQiOjE2ODMwNTQwMTQsImV4cCI6MTY4MzE0MDQxNH0.ZNAknglcKMaaRFJWJb545_LW6HHxB6s47RaVDU4Xt4k",
+    });
+    setClothID([...fetch.data]);
+    setLoading(0);
+  };
+
   useEffect(() => {
-    setTimeout(() => {
-      setLoading(0);
-    }, 3000);
+    setLoading(1);
+    fetchData();
   }, []);
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log(Data);
+    if (
+      Data.account === "" ||
+      Data.address === "" ||
+      Data.armhole === "" ||
+      Data.chest === "" ||
+      Data.chest === "" ||
+      Data.client === "" ||
+      Data.clothid === "" ||
+      Data.colloar === "" ||
+      Data.daman === "" ||
+      Data.desc === "" ||
+      Data.length === "" ||
+      // Data.marketerid === "" ||
+      Data.paymentnumber === "" ||
+      Data.price === 0 ||
+      Data.quantity === 0 ||
+      Data.shoulders === "" ||
+      Data.sleeves === "" ||
+      Data.type === "" ||
+      Data.waist === ""
+    ) {
+      setOpen(true);
+    } else {
+      try {
+        setCP(1);
+        const fetch = await axios.post(`${URL}/createOrder`, Data);
+        if (fetch.status === 200) {
+          console.log("Ok");
+        }
+        console.log(fetch);
+        setCP(0);
+        // setSubmit(1);
+        // setOpen1(1);
+      } catch (error) {
+        console.log(error);
+        // setErr
+        setError(1);
+      }
+    }
   };
 
   return (
@@ -156,6 +220,24 @@ function Create() {
         <Splash />
       ) : (
         <Box>
+          <Snackbar open={Open} onClose={handleClick}>
+            <Alert onClose={() => {}} onClick={handleClick} severity="error">
+              <AlertTitle>Error</AlertTitle>
+              Fill all of the given inputs — <strong>Be careful!</strong>
+            </Alert>
+          </Snackbar>
+          <Snackbar open={Error} onClose={handleClick2}>
+            <Alert onClose={() => {}} onClick={handleClick2} severity="error">
+              <AlertTitle>Error</AlertTitle>
+              {ErrData} — <strong>Wait for a while!</strong>
+            </Alert>
+          </Snackbar>
+          <Snackbar open={Open1} onClose={handleClick1}>
+            <Alert onClose={() => {}} onClick={handleClick1} severity="success">
+              <AlertTitle>Submitted</AlertTitle>
+              Wait for Order Confirmation — <strong>Be patient!</strong>
+            </Alert>
+          </Snackbar>
           <Typography variant="h4">Create an Order</Typography>
           <Typography variant="body2" py={3}>
             Please first verify the given steps below
@@ -234,7 +316,7 @@ function Create() {
               />
               <TextField
                 name="paymentnumber"
-                label="Payment Number"
+                label="(Payment / Account) No."
                 onChange={handleData}
               />
               <TextField name="address" label="Address" onChange={handleData} />
@@ -249,6 +331,34 @@ function Create() {
                 name="price"
                 label="Price (100%)"
                 onChange={handleData}
+              />
+              <Autocomplete
+                freeSolo
+                id="free-solo-2-demo"
+                disableClearable
+                name="account"
+                value={Data.account}
+                onChange={(e, newValue) =>
+                  setData({ ...Data, account: newValue })
+                }
+                sx={{ minWidth: "150px" }}
+                options={[
+                  "Easypaisa",
+                  "Jazzcash",
+                  "Nayapay",
+                  "Sadapay",
+                  "Bank",
+                ].map((option) => option)}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Account type"
+                    InputProps={{
+                      ...params.InputProps,
+                      type: "search",
+                    }}
+                  />
+                )}
               />
             </Box>
             <Box pt={3} display="flex" gap={3} alignItems="center">
@@ -298,8 +408,8 @@ function Create() {
                   defaultValue={0}
                 />
                 <TextField
-                  name="Shoulders"
-                  label="shoulders"
+                  name="shoulders"
+                  label="Shoulders"
                   type="number"
                   onChange={handleData}
                   defaultValue={0}
@@ -356,20 +466,69 @@ function Create() {
               onChange={handleData}
             />
             <Box py={1}>
-              <Typography variant="body2">Cloth ID</Typography>
-              <Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                label="Cloth ID"
+              <Typography variant="body2" m={1}>
+                Cloth ID
+              </Typography>
+              <Autocomplete
+                freeSolo
+                id="free-solo-2-demo"
+                disableClearable
                 name="clothid"
-                value={Data.clothid}
-                sx={{ minWidth: "300px" }}
-                onChange={handleData}
-              >
-                {ClothID.map((item) => {
-                  return <MenuItem value={item}>{item}</MenuItem>;
+                value={Data.account}
+                onChange={(e, newValue) => {
+                  const realValue = newValue.split(" ");
+                  setData({ ...Data, clothid: realValue[0] });
+                  let temp = ClothID.filter((item) => {
+                    return item._id === realValue[0];
+                  });
+                  setSelected(temp);
+                  console.log(Selected);
+                }}
+                sx={{ minWidth: "150px" }}
+                options={ClothID.map((option) => {
+                  return option._id + " " + option.name;
                 })}
-              </Select>
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Select cloth here"
+                    InputProps={{
+                      ...params.InputProps,
+                      type: "search",
+                    }}
+                  />
+                )}
+              />
+              <Box my={1}>
+                <Typography variant="body2" mt={1} mx={1}>
+                  Original Price
+                </Typography>
+                <Typography variant="caption" m={1}>
+                  Please verify that the entered payment and given payment is
+                  equal to the original one!
+                </Typography>
+              </Box>
+              <Typography color="red" variant="caption">
+                {Selected[0].price !== Data.price
+                  ? "Original and Entered Values don't match!"
+                  : ""}
+              </Typography>
+              <Box display="flex" flexWrap="wrap" gap={2}>
+                <TextField
+                  disabled
+                  value={Selected[0].price}
+                  placeholder="Item Original Price"
+                />
+                <TextField
+                  disabled
+                  value={
+                    Selected[0].quantity === 0
+                      ? "Out of Stock"
+                      : Selected[0].quantity
+                  }
+                  placeholder="Item Quantity Left"
+                />
+              </Box>
             </Box>
             <Button
               onClick={handleSubmit}
@@ -382,9 +541,12 @@ function Create() {
                   bgcolor: "grey",
                 },
                 height: "60px",
+                width: "150px",
               }}
             >
-              {Loading ? (
+              {Submit ? (
+                "Submitted"
+              ) : CP ? (
                 <Box display="flex" justifyContent="center">
                   <CircularProgress sx={{ color: "black", p: "5px" }} />
                 </Box>
