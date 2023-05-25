@@ -1,8 +1,11 @@
 import React from "react";
 import SignIn from "./Signin";
+import { useSelector } from "react-redux";
 
 function Protected({ Component }) {
-  const login = 1;
+  const { token } = useSelector((state) => state.checkToken);
+  var login = false;
+  if (token !== "") login = true;
   return <>{login ? <Component /> : <SignIn />}</>;
 }
 

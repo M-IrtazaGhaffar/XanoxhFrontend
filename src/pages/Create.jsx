@@ -4,6 +4,7 @@ import {
   Alert,
   AlertTitle,
   Autocomplete,
+  Backdrop,
   Box,
   Button,
   Chip,
@@ -21,13 +22,18 @@ import {
   Typography,
 } from "@mui/material";
 import axios from "axios";
-import { URL } from "../Config";
+import { URL1 } from "../Config";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 function Create() {
+  const { token, marketerid } = useSelector((state) => state.checkToken);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [Type, setType] = useState("");
   const [Data, setData] = useState({
     clothid: "",
-    marketerid: "1",
+    marketerid: marketerid,
     client: "",
     paymentnumber: "",
     address: "",
@@ -45,10 +51,10 @@ function Create() {
     armhole: "",
     type: Type,
     account: "",
-    token:
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjoiaXJ0YXphZ2hhZmZhckBnbWFpbC5jb20iLCJpYXQiOjE2ODMwNTQwMTQsImV4cCI6MTY4MzE0MDQxNH0.ZNAknglcKMaaRFJWJb545_LW6HHxB6s47RaVDU4Xt4k",
+    token: token,
   });
 
+  const [CP2, setCP2] = useState(0);
   const [Open, setOpen] = useState(0);
   const [Open1, setOpen1] = useState(0);
   const handleClick = () => {
@@ -65,7 +71,15 @@ function Create() {
   const [ErrData, setErrData] = useState("");
   const [CP, setCP] = useState(0);
   const [Submit, setSubmit] = useState(0);
-  const [Selected, setSelected] = useState([{}]);
+  const [Selected, setSelected] = useState({
+    price: 0,
+    quantity: 0,
+    _id: "",
+    name: "",
+    desc: "",
+    marketerpayment: 0,
+  });
+  const [enteredPrice, setenteredPrice] = useState(0);
   const [Note, setNote] = useState([
     "Make sure your client is real and authentic to purchase",
     "Verify the payment method type",
@@ -76,6 +90,7 @@ function Create() {
     "Check again before ordering",
   ]);
   const [ClothID, setClothID] = useState([{}]);
+
   const handleData = (e) => {
     if (e.target.name === "price" || "quantity")
       setData({ ...Data, [e.target.name]: parseInt(e.target.value) });
@@ -145,7 +160,6 @@ function Create() {
     if (size === "medium") n = 1;
     if (size === "large") n = 2;
     if (size === "xlarge") n = 3;
-
     if (size === "custom") n = 0;
     Data.length = Sizes[n].size.length;
     Data.chest = Sizes[n].size.chest;
@@ -159,12 +173,80 @@ function Create() {
 
   const fetchData = async () => {
     // Fetch Stock
-    const fetch = await axios.post(`${URL}/stock`, {
-      token:
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjoiaXJ0YXphZ2hhZmZhckBnbWFpbC5jb20iLCJpYXQiOjE2ODMwNTQwMTQsImV4cCI6MTY4MzE0MDQxNH0.ZNAknglcKMaaRFJWJb545_LW6HHxB6s47RaVDU4Xt4k",
-    });
-    setClothID([...fetch.data]);
-    setLoading(0);
+    try {
+      const fetch = await axios.post(`${URL1}/stock`, {
+        token: token,
+      });
+      setSelected(fetch.data);
+      setCP(0);
+      if (fetch.status === 200) {
+        setClothID([...fetch.data]);
+        setLoading(0);
+      } else if (fetch.status === 203) {
+        setErrData(fetch.data);
+        setError(1);
+        setCP(0);
+        setTimeout(() => {
+          dispatch({
+            type: "removeToken",
+          });
+          navigate("/signin");
+        }, 2000);
+      } else {
+        setErrData(fetch.data);
+        setError(1);
+        setCP(0);
+      }
+    } catch (error) {
+      console.log(error);
+      setErrData(error.response.data);
+      setError(1);
+    }
+  };
+
+  const handleSelected = async (id) => {
+    try {
+      setCP2(1);
+      const fetch = await axios.post(`${URL1}/stockDetail`, {
+        id: id,
+        token: token,
+      });
+      setSelected(fetch.data);
+      setCP(0);
+      if (fetch.status === 200) {
+        Selected.clothid = id;
+        Data.clothid = id;
+        Selected.price = fetch.data.price;
+        Selected.quantity = fetch.data.quantity;
+        Selected.marketerpayment = fetch.data.marketerpayment;
+        Data.price = Selected.price * Data.quantity;
+        Data.marketerpayment = Selected.marketerpayment * Data.quantity;
+        console.log(Data);
+        setCP2(0);
+        setCP(0);
+      } else if (fetch.status === 203) {
+        setErrData(fetch.data);
+        setError(1);
+        setCP(0);
+        setTimeout(() => {
+          dispatch({
+            type: "removeToken",
+          });
+          navigate("/signin");
+        }, 2000);
+        setCP2(0);
+      } else {
+        setErrData(fetch.data);
+        setError(1);
+        setCP(0);
+        setCP2(0);
+      }
+    } catch (error) {
+      console.log(error);
+      setErrData(error.response.data);
+      setError(1);
+      setCP2(0);
+    }
   };
 
   useEffect(() => {
@@ -201,22 +283,50 @@ function Create() {
       try {
         console.log(Data);
         setCP(1);
-        const fetch = await axios.post(`${URL}/createOrder`, Data);
-        if (fetch.status === 200) {
-          console.log("Ok");
-        }
-        console.log(fetch);
+        const fetch = await axios.post(`${URL1}/createOrder`, Data);
         setCP(0);
         if (fetch.status === 200) {
           setSubmit(1);
           setOpen1(1);
-        } else {
-          setErrData(fetch.data)
+          setCP(0);
+
+          Data.account = "";
+          Data.address = "";
+          Data.armhole = "";
+          Data.chest = "";
+          Data.chest = "";
+          Data.client = "";
+          Data.clothid = "";
+          Data.colloar = "";
+          Data.daman = "";
+          Data.desc = "";
+          Data.length = "";
+          Data.marketerid = "";
+          Data.paymentnumber = "";
+          Data.price = 0;
+          Data.quantity = 0;
+          Data.shoulders = "";
+          Data.sleeves = "";
+          Data.type = "";
+          Data.waist = "";
+        } else if (fetch.status === 203) {
+          setErrData(fetch.data);
           setError(1);
+          setCP(0);
+          setTimeout(() => {
+            dispatch({
+              type: "removeToken",
+            });
+            navigate("/signin");
+          }, 2000);
+        } else {
+          setErrData(fetch.data);
+          setError(1);
+          setCP(0);
         }
       } catch (error) {
         console.log(error);
-        setErrData(error.message)
+        setErrData(error.response.data);
         setError(1);
       }
     }
@@ -346,7 +456,9 @@ function Create() {
               <TextField
                 name="price"
                 label="Price (100%)"
-                onChange={handleData}
+                onChange={(e) => {
+                  setenteredPrice(e.target.value);
+                }}
               />
               <Autocomplete
                 freeSolo
@@ -469,19 +581,20 @@ function Create() {
             ) : (
               ""
             )}
-            <textarea
+            <TextField
+              id="outlined-multiline-static"
               name="desc"
               placeholder="Description and Details about Package"
+              multiline
+              rows={4}
               style={{
                 width: "100%",
-                padding: "13px",
+                margin: "20px 0 0 0",
                 resize: "none",
-                margin: "20px 0 0 0 ",
               }}
-              rows={10}
-              onChange={(e) =>
-                setData({ ...Data, [e.target.name]: e.target.value })
-              }
+              onChange={(e) => {
+                Data.desc = e.target.value;
+              }}
             />
             <Box py={1}>
               <Typography variant="body2" m={1}>
@@ -492,21 +605,9 @@ function Create() {
                 id="free-solo-2-demo"
                 disableClearable
                 name="clothid"
-                value={Data.account}
                 onChange={(e, newValue) => {
                   const realValue = newValue.split(" ");
-                  console.log(realValue);
-                  // setData({ ...Data, clothid: realValue[0] });
-                  Data.clothid = realValue[0];
-                  let temp = ClothID.filter((item) => {
-                    return item._id === realValue[0];
-                  });
-                  setSelected(temp);
-                  setData({
-                    ...Data,
-                    marketerpayment: Selected[0].marketerpayment,
-                  });
-                  console.log(Selected);
+                  handleSelected(realValue[0]);
                 }}
                 sx={{ minWidth: "150px" }}
                 options={ClothID.map((option) => {
@@ -533,26 +634,56 @@ function Create() {
                 </Typography>
               </Box>
               <Typography color="red" variant="caption">
-                {Selected[0].price !== Data.price
+                {Selected.price !== Data.price / Data.quantity
                   ? "Original and Entered Values don't match!"
                   : ""}
+              </Typography>
+              <br />
+              <Typography color="red" variant="caption">
+                Please also verify that the stock you are entring is in stock or
+                not! This'll help you to maintain your sustainability. Otherwise
+                don't accept the order!
               </Typography>
               <Box display="flex" flexWrap="wrap" gap={2}>
                 <TextField
                   disabled
-                  value={Selected[0].price}
+                  value={Selected.price}
                   placeholder="Item Original Price"
                 />
                 <TextField
                   disabled
+                  value={Data.price}
+                  placeholder="Qunatity Price"
+                />
+                <TextField
+                  disabled
                   value={
-                    Selected[0].quantity === 0
-                      ? "Out of Stock"
-                      : Selected[0].quantity
+                    Selected.quantity === 0 ? "Out of Stock" : Selected.quantity
                   }
                   placeholder="Item Quantity Left"
                 />
+                <TextField
+                  disabled
+                  value={Selected.desc}
+                  placeholder="Item Description"
+                />
               </Box>
+            </Box>
+            <Box>
+              {CP2 ? (
+                <Backdrop
+                  sx={{
+                    color: "#fff",
+                    zIndex: (theme) => theme.zIndex.drawer + 1,
+                  }}
+                  open={CP2}
+                  onClick={() => setCP2(0)}
+                >
+                  <CircularProgress sx={{ color: "black", p: "5px" }} />
+                </Backdrop>
+              ) : (
+                ""
+              )}
             </Box>
             <Button
               onClick={handleSubmit}

@@ -1,20 +1,64 @@
-import { Alert, AlertTitle, Box, Button, Snackbar, Typography } from "@mui/material";
+import {
+  Alert,
+  AlertTitle,
+  Box,
+  Button,
+  CircularProgress,
+  Snackbar,
+  Typography,
+} from "@mui/material";
 import React, { useEffect, useState } from "react";
 import Splash from "../components/Splash";
+import { useDispatch, useSelector } from "react-redux";
+import axios from "axios";
+import { URL, URL1 } from "../Config";
+import { useNavigate } from "react-router-dom";
 
 function Report() {
-  const [Data, setData] = useState("")
+  const { token, marketerid } = useSelector((state) => state.checkToken);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const [Data, setData] = useState("");
   const [Loading, setLoading] = useState(1);
-  const [Open, setOpen] = useState(0)
+  const [CP, setCP] = useState(0)
+  const [Open, setOpen] = useState(0);
+  const [Err, setErr] = useState(0);
+  const [ErrMsg, setErrMsg] = useState("");
   const handleClick = () => {
     setOpen(!Open);
   };
+  const handleClick1 = () => {
+    setErr(!Err);
+  };
 
-  const handleInput = () => {
-    if (Data === "") {
-      setOpen(true)
-    }
-  }
+  const handleInput = async () => {
+    try {
+      if (Data === "") {
+        setErrMsg("Please fill all inputs!");
+        setErr(1);
+      } else {
+        setCP(1);
+        const fetch = await axios.post(`${URL}/reportForm`, {
+          id: marketerid,
+          token: token,
+          report: Data,
+        });
+        if (fetch.status === 200) {
+          setOpen(1);
+        } else if (fetch.status === 203) {
+          setErrMsg(fetch.data);
+          setErr(1);
+          setTimeout(() => {
+            dispatch({
+              type: "removeToken",
+            });
+            navigate("/signin");
+          }, 2000);
+        }
+        setCP(0)
+      }
+    } catch (error) {}
+  };
 
   useEffect(() => {
     setTimeout(() => {
@@ -28,10 +72,16 @@ function Report() {
         <Splash />
       ) : (
         <Box>
-          <Snackbar open={Open} onClose={handleClick}>
-            <Alert onClose={() => {}} onClick={handleClick} severity="error">
+          <Snackbar open={Err} onClose={handleClick1}>
+            <Alert onClose={() => {}} onClick={handleClick1} severity="error">
               <AlertTitle>Error</AlertTitle>
-              This is an error alert — <strong>check it out!</strong>
+              {ErrMsg} — <strong>Wait for a while!</strong>
+            </Alert>
+          </Snackbar>
+          <Snackbar open={Open} onClose={handleClick}>
+            <Alert onClose={() => {}} onClick={handleClick} severity="success">
+              <AlertTitle>Success</AlertTitle>
+              Data Submitted — <strong>Be patient!</strong>
             </Alert>
           </Snackbar>
           <Typography variant="h4">Report Us</Typography>
@@ -60,10 +110,14 @@ function Report() {
                 bgcolor: "grey",
               },
               alignSelf: "flex-end",
+              height: '50px',
+              width: '150px'
             }}
             onClick={handleInput}
           >
-            Report
+            {
+              CP ? <CircularProgress sx={{ color: 'black' }} /> : 'Report'
+            }
           </Button>
         </Box>
       )}

@@ -8,8 +8,11 @@ import Container from "@mui/material/Container";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Splash from "../components/Splash";
-import { CircularProgress } from "@mui/material";
+import { Alert, AlertTitle, CircularProgress, Snackbar } from "@mui/material";
 import SVG from "../components/SVG";
+import axios from "axios";
+import { URL1 } from "../Config";
+import { useDispatch } from "react-redux";
 
 function Copyright(props) {
   return (
@@ -29,29 +32,68 @@ function Copyright(props) {
 export default function SignIn() {
   const [Loading, setLoading] = useState(0);
   const [SplashScreen, setSplash] = useState(1);
+  const [Open, setOpen] = useState(0);
+  const [ErrMsg, setErrMsg] = useState("");
+
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const handleClick = () => {
+    setOpen(!Open);
+  };
+  const handleSubmit = async (event) => {
+    try {
+      setLoading(1);
+      event.preventDefault();
+      setLoading(1);
+      const data = new FormData(event.currentTarget);
+      console.log({
+        email: data.get("email"),
+        password: data.get("password"),
+      });
+
+      if (data.get("email") === "" || data.get("password") === "") {
+        setErrMsg("Please fill all inputs");
+        setOpen(1);
+      } else {
+        const fetch = await axios.post(`${URL1}/login`, {
+          email: data.get("email"),
+          password: data.get("password"),
+        });
+
+        console.log(fetch);
+
+        if (fetch.status === 200 && fetch.data.login === true) {
+          dispatch({
+            type: "addToken",
+            payload: {
+              token: fetch.data.token,
+              marketerid: fetch.data.user._id,
+            },
+          });
+          navigate("/dashboard/");
+        } else if (fetch.status === 200 && fetch.data.login === false) {
+          setErrMsg(fetch.data.msg);
+          setOpen(1);
+        } else {
+          setErrMsg(fetch.data.msg);
+          setOpen(1);
+        }
+        setLoading(0);
+      }
+    } catch (error) {
+      console.log(error);
+      setErrMsg(error.message);
+      setOpen(1);
+      setLoading(0);
+    }
+  };
 
   useEffect(() => {
     setTimeout(() => {
       setSplash(false);
-    }, 7000);
+    }, 3000);
   }, []);
-
-  const navigate = useNavigate();
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    setLoading(1);
-    const data = new FormData(event.currentTarget);
-    console.log({
-      id: data.get("id"),
-      password: data.get("password"),
-    });
-
-    if (true) {
-      setTimeout(() => {
-        navigate("/dashboard/");
-      }, 1000);
-    }
-  };
 
   return (
     <Box>
@@ -59,6 +101,12 @@ export default function SignIn() {
         <Splash />
       ) : (
         <Container component="main" maxWidth="xs" sx={{ px: 4 }}>
+          <Snackbar open={Open} onClose={handleClick}>
+            <Alert onClose={() => {}} onClick={handleClick} severity="error">
+              <AlertTitle>Error</AlertTitle>
+              {ErrMsg} — <strong>Be careful!</strong>
+            </Alert>
+          </Snackbar>
           <CssBaseline />
           <Box
             sx={{
@@ -78,11 +126,12 @@ export default function SignIn() {
               sx={{ mt: 1 }}
             >
               <TextField
-                name="id"
+                name="email"
                 margin="normal"
+                type="email"
                 required
                 fullWidth
-                label="ID"
+                label="Email"
                 autoComplete="off"
                 autoFocus
               />
@@ -117,17 +166,6 @@ export default function SignIn() {
                   "Sign In"
                 )}
               </Button>
-              <Link
-                variant="body2"
-                onClick={() => navigate("/forgot")}
-                sx={{
-                  color: "grey",
-                  textDecorationColor: "gray",
-                  cursor: "pointer",
-                }}
-              >
-                Forgot password?
-              </Link>
             </Box>
           </Box>
           <Copyright sx={{ mt: 8, mb: 4 }} />

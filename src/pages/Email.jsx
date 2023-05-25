@@ -5,36 +5,69 @@ import {
   AlertTitle,
   Box,
   Button,
+  CircularProgress,
   IconButton,
   Snackbar,
   TextField,
   Typography,
 } from "@mui/material";
 import Splash from "../components/Splash";
+import axios from "axios";
+import { URL, URL1 } from "../Config";
+import { useSelector } from "react-redux";
 
 function Email() {
+  const { token, marketerid } = useSelector((state) => state.checkToken);
   const [Loading, setLoading] = useState(1);
+  const [CP, setCP] = useState(0);
   const [Open, setOpen] = useState(0);
+  const [Err, setErr] = useState(0);
+  const [ErrMsg, setErrMsg] = useState("");
   const handleClick = () => {
     setOpen(!Open);
   };
+  const handleClick1 = () => {
+    setErr(!Err);
+  };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    const name = data.get("name");
-    const subject = data.get("subject");
-    const message = data.get("message");
-    console.log(name + " " + subject + " " + message);
-    if (name === "" || subject === "" || message === "") {
-      setOpen(1);
+  const handleSubmit = async (event) => {
+    try {
+      event.preventDefault();
+      const data = new FormData(event.currentTarget);
+      const name = data.get("name");
+      const subject = data.get("subject");
+      const message = data.get("message");
+      console.log(name + " " + subject + " " + message);
+      if (name === "" || subject === "" || message === "") {
+        setErr(1);
+        setErrMsg("Fill all of the fields!");
+      } else {
+        setCP(1);
+        const fetch = await axios.post(`${URL1}/contactForm`, {
+          name: name,
+          subject: subject,
+          detail: message,
+          token: token,
+          id: marketerid,
+        });
+        if (fetch.status === 200) {
+          setOpen(1);
+        } else {
+          setErrMsg(fetch.data);
+          setErr(1);
+        }
+        setCP(0);
+      }
+    } catch (error) {
+      setErr(1);
+      setErrMsg(error.message);
     }
   };
 
   useEffect(() => {
     setTimeout(() => {
       setLoading(0);
-    }, 3000);
+    }, 2000);
   }, []);
 
   return (
@@ -49,9 +82,15 @@ function Email() {
           }}
         >
           <Snackbar open={Open} onClose={handleClick}>
-            <Alert onClose={() => {}} onClick={handleClick} severity="error">
+            <Alert onClose={() => {}} onClick={handleClick} severity="success">
+              <AlertTitle>Submitted</AlertTitle>
+              Data Submitted — <strong>Be patient!</strong>
+            </Alert>
+          </Snackbar>
+          <Snackbar open={Err} onClose={handleClick1}>
+            <Alert onClose={() => {}} onClick={handleClick1} severity="error">
               <AlertTitle>Error</AlertTitle>
-              This is an error alert — <strong>check it out!</strong>
+              {ErrMsg} — <strong>Wait for a while!</strong>
             </Alert>
           </Snackbar>
           <Typography variant="h4">Get in touch with Us</Typography>
@@ -128,9 +167,11 @@ function Email() {
                   bgcolor: "grey",
                 },
                 alignSelf: "flex-end",
+                width: "150px",
+                height: "50px",
               }}
             >
-              Send
+              {CP ? <CircularProgress sx={{ color: "black" }} /> : "Send"}
             </Button>
           </Box>
         </Box>

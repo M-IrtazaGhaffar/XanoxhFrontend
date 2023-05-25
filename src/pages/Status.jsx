@@ -1,7 +1,10 @@
 import {
+  Alert,
+  AlertTitle,
   Box,
   Chip,
   CircularProgress,
+  Snackbar,
   Table,
   TableBody,
   TableCell,
@@ -16,165 +19,23 @@ import React from "react";
 import Splash from "../components/Splash";
 import { useState } from "react";
 import { useEffect } from "react";
+import axios from "axios";
+import { URL1 } from "../Config";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 function Status() {
-  const data = [
-    {
-      id: "6442a63dd8bfab42194152d5",
-      client: "Muhammad Irtaza Ghaffar",
-      price: "4000",
-      Ordered: "2023-04-21",
-      confirmed: "2023-04-21",
-      easypaisa: "03320523524",
-      delivered: "2023-04-21",
-      quantity: 3,
-    },
-    {
-      id: "6442a63dd8bfab42194152d5",
-      client: "Muhammad Irtaza Ghaffar",
-      price: "4000",
-      Ordered: "2023-04-21",
-      confirmed: "2023-04-21",
-      easypaisa: "03320523524",
-      delivered: "2023-04-21",
-      quantity: 3,
-    },
-    {
-      id: "6442a63dd8bfab42194152d5",
-      client: "Muhammad Irtaza Ghaffar",
-      price: "4000",
-      Ordered: "2023-04-21",
-      confirmed: "2023-04-21",
-      easypaisa: "03320523524",
-      delivered: "2023-04-21",
-      quantity: 3,
-    },
-    {
-      id: "6442a63dd8bfab42194152d5",
-      client: "Muhammad Irtaza Ghaffar",
-      price: "4000",
-      Ordered: "2023-04-21",
-      confirmed: "2023-04-21",
-      easypaisa: "03320523524",
-      delivered: "2023-04-21",
-      quantity: 3,
-    },
-    {
-      id: "6442a63dd8bfab42194152d5",
-      client: "Muhammad Irtaza Ghaffar",
-      price: "4000",
-      Ordered: "2023-04-21",
-      confirmed: "2023-04-21",
-      easypaisa: "03320523524",
-      delivered: "2023-04-21",
-      quantity: 3,
-    },
-    {
-      id: "6442a63dd8bfab42194152d5",
-      client: "Muhammad Irtaza Ghaffar",
-      price: "4000",
-      Ordered: "2023-04-21",
-      confirmed: "2023-04-21",
-      easypaisa: "03320523524",
-      delivered: "2023-04-21",
-      quantity: 3,
-    },
-    {
-      id: "6442a63dd8bfab42194152d5",
-      client: "Muhammad Irtaza Ghaffar",
-      price: "4000",
-      Ordered: "2023-04-21",
-      confirmed: "2023-04-21",
-      easypaisa: "03320523524",
-      delivered: "2023-04-21",
-      quantity: 3,
-    },
-    {
-      id: "6442a63dd8bfab42194152d5",
-      client: "Muhammad Irtaza Ghaffar",
-      price: "4000",
-      Ordered: "2023-04-21",
-      confirmed: "2023-04-21",
-      easypaisa: "03320523524",
-      delivered: "2023-04-21",
-      quantity: 3,
-    },
-    {
-      id: "6442a63dd8bfab42194152d5",
-      client: "Muhammad Irtaza Ghaffar",
-      price: "4000",
-      Ordered: "2023-04-21",
-      confirmed: "2023-04-21",
-      easypaisa: "03320523524",
-      delivered: "2023-04-21",
-      quantity: 3,
-    },
-    {
-      id: "6442a63dd8bfab42194152d5",
-      client: "Muhammad Irtaza Ghaffar",
-      price: "4000",
-      Ordered: "2023-04-21",
-      confirmed: "2023-04-21",
-      easypaisa: "03320523524",
-      delivered: "2023-04-21",
-      quantity: 3,
-    },
-    {
-      id: "6442a63dd8bfab42194152d5",
-      client: "Muhammad Irtaza Ghaffar",
-      price: "4000",
-      Ordered: "2023-04-21",
-      confirmed: "2023-04-21",
-      easypaisa: "03320523524",
-      delivered: "2023-04-21",
-      quantity: 3,
-    },
-    {
-      id: "6442a63dd8bfab42194152d5",
-      client: "Muhammad Irtaza Ghaffar",
-      price: "4000",
-      Ordered: "2023-04-21",
-      confirmed: "2023-04-21",
-      easypaisa: "03320523524",
-      delivered: "2023-04-21",
-      quantity: 3,
-    },
-    {
-      id: "6442a63dd8bfab42194152d5",
-      client: "Muhammad Irtaza Ghaffar",
-      price: "4000",
-      Ordered: "2023-04-21",
-      confirmed: "2023-04-21",
-      easypaisa: "03320523524",
-      delivered: "2023-04-21",
-      quantity: 3,
-    },
-    {
-      id: "6442a63dd8bfab42194152d5",
-      client: "Muhammad Irtaza Ghaffar",
-      price: "4000",
-      Ordered: "2023-04-21",
-      confirmed: "2023-04-21",
-      easypaisa: "03320523524",
-      delivered: "2023-04-21",
-      quantity: 3,
-    },
-    {
-      id: "6442a63dd8bfab42194152d5",
-      client: "Muhammad Irtaza Ghaffar",
-      price: "4000",
-      Ordered: "2023-04-21",
-      confirmed: "2023-04-21",
-      easypaisa: "03320523524",
-      delivered: "2023-04-21",
-      quantity: 3,
-    },
-  ];
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { marketerid, token } = useSelector((state) => state.checkToken);
+  const [Data, setData] = useState([]);
   const [Loading, setLoading] = useState(1);
   const [page, setpage] = useState(0);
   const [rowsPerPage, setrowsPerPage] = useState(10);
   const [Type, setType] = useState("All");
-  const [Fetching, setFetching] = useState(1);
+
+  const [Err, setErr] = useState(0);
+  const [ErrMsg, setErrMsg] = useState("");
 
   const handleChangePage = (event, nextPage) => {
     setpage(nextPage);
@@ -183,21 +44,108 @@ function Status() {
     setrowsPerPage(event.target.value);
   };
 
-  const fetchAll = () => {
+  const fetchAll = async () => {
     setType("All");
+    try {
+      setLoading(1);
+      const fetch = await axios.post(`${URL1}/allOrders`, {
+        id: marketerid,
+        token: token,
+      });
+      if (fetch.status === 200) {
+        setData(fetch.data);
+        setLoading(0);
+      } else if (fetch.status === 203) {
+        setErrMsg(fetch.data);
+        setErr(1);
+        setLoading(0);
+        setTimeout(() => {
+          dispatch({
+            type: "removeToken",
+          });
+          navigate("/signin");
+        }, 2000);
+      } else {
+        setErrMsg(fetch.data);
+        setErr(1);
+        setLoading(0);
+      }
+    } catch (error) {
+      console.log(error);
+      setErrMsg(error.message);
+      setErr(1);
+      setLoading(0);
+    }
   };
-  const fetchDelivered = () => {
+  const fetchDelivered = async () => {
     setType("Delivered");
+    try {
+      setLoading(1);
+      const fetch = await axios.post(`${URL1}/deliveredOrders`, {
+        id: marketerid,
+        token: token,
+      });
+      if (fetch.status === 200) {
+        setData(fetch.data);
+        setLoading(0);
+      } else if (fetch.status === 203) {
+        setErrMsg(fetch.data);
+        setErr(1);
+        setLoading(0);
+        setTimeout(() => {
+          dispatch({
+            type: "removeToken",
+          });
+          navigate("/signin");
+        }, 2000);
+      } else {
+        setErrMsg(fetch.data);
+        setErr(1);
+        setLoading(0);
+      }
+    } catch (error) {
+      console.log(error);
+      setErrMsg(error.message);
+      setErr(1);
+      setLoading(0);
+    }
   };
-  const fetchPending = () => {
+  const fetchPending = async () => {
     setType("Pending");
+    try {
+      setLoading(1);
+      const fetch = await axios.post(`${URL1}/pendingOrders`, {
+        id: marketerid,
+        token: token,
+      });
+      if (fetch.status === 200) {
+        setData(fetch.data);
+        setLoading(0);
+      } else if (fetch.status === 203) {
+        setErrMsg(fetch.data);
+        setErr(1);
+        setLoading(0);
+        setTimeout(() => {
+          dispatch({
+            type: "removeToken",
+          });
+          navigate("/signin");
+        }, 2000);
+      } else {
+        setErrMsg(fetch.data);
+        setErr(1);
+        setLoading(0);
+      }
+    } catch (error) {
+      console.log(error);
+      setErrMsg(error.message);
+      setErr(1);
+      setLoading(0);
+    }
   };
 
   useEffect(() => {
-    setTimeout(() => {
-      setLoading(0);
-      setFetching(0);
-    }, 3000);
+    fetchAll();
   }, []);
 
   return (
@@ -206,6 +154,16 @@ function Status() {
         <Splash />
       ) : (
         <Box>
+          <Snackbar open={Err} onClose={() => setErr(0)}>
+            <Alert
+              onClose={() => {}}
+              onClick={() => setErr(0)}
+              severity="error"
+            >
+              <AlertTitle>Error</AlertTitle>
+              {ErrMsg} — <strong>Be careful!</strong>
+            </Alert>
+          </Snackbar>
           <Box sx={{ display: "flex", gap: "10px" }}>
             <Chip
               variant={Type === "All" ? "filled" : "outlined"}
@@ -238,7 +196,7 @@ function Status() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {Fetching ? (
+                {Loading ? (
                   <Box
                     sx={{
                       paddingTop: "20px",
@@ -253,32 +211,35 @@ function Status() {
                     <Typography>Please wait</Typography>
                   </Box>
                 ) : (
-                  data
-                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                    .map((item) => {
-                      return (
-                        <TableRow>
-                          <TableCell>{item.id}</TableCell>
-                          <TableCell>{item.client}</TableCell>
-                          <TableCell>{item.price}</TableCell>
-                          <TableCell>{item.Ordered}</TableCell>
-                          <TableCell>{item.confirmed}</TableCell>
-                          <TableCell>{item.easypaisa}</TableCell>
-                          <TableCell>{item.delivered}</TableCell>
-                          <TableCell>{item.quantity}</TableCell>
-                        </TableRow>
-                      );
-                    })
+                  Data.slice(
+                    page * rowsPerPage,
+                    page * rowsPerPage + rowsPerPage
+                  ).map((item) => {
+                    return (
+                      <TableRow>
+                        <TableCell>{item._id}</TableCell>
+                        <TableCell>{item.clientName}</TableCell>
+                        <TableCell>{item.price}</TableCell>
+                        <TableCell>{item.dateOrdered.split("T")[0]}</TableCell>
+                        <TableCell>
+                          {item.dateConfirmationOrder.split("T")[0]}
+                        </TableCell>
+                        <TableCell>{item.clientNumber}</TableCell>
+                        <TableCell>{item.dateDelivered}</TableCell>
+                        <TableCell>{item.quantity}</TableCell>
+                      </TableRow>
+                    );
+                  })
                 )}
               </TableBody>
               <TableFooter>
-                {Fetching ? (
+                {Loading ? (
                   ""
                 ) : (
                   <TablePagination
                     rowsPerPageOptions={[5, 10, 25, 50]}
                     component="div"
-                    count={data.length}
+                    count={Data.length}
                     rowsPerPage={rowsPerPage}
                     page={page}
                     onPageChange={handleChangePage}
