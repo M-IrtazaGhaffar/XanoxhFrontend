@@ -18,9 +18,10 @@ function Report() {
   const { token, marketerid } = useSelector((state) => state.checkToken);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [Submitted, setSubmitted] = useState(0);
   const [Data, setData] = useState("");
   const [Loading, setLoading] = useState(1);
-  const [CP, setCP] = useState(0)
+  const [CP, setCP] = useState(0);
   const [Open, setOpen] = useState(0);
   const [Err, setErr] = useState(0);
   const [ErrMsg, setErrMsg] = useState("");
@@ -33,6 +34,11 @@ function Report() {
 
   const handleInput = async () => {
     try {
+      if (Submitted) {
+        setErrMsg("Already Submitted! Reload or Try again.");
+        setErr(1);
+        return;
+      }
       if (Data === "") {
         setErrMsg("Please fill all inputs!");
         setErr(1);
@@ -45,6 +51,7 @@ function Report() {
         });
         if (fetch.status === 200) {
           setOpen(1);
+          setSubmitted(1);
         } else if (fetch.status === 203) {
           setErrMsg(fetch.data);
           setErr(1);
@@ -55,15 +62,13 @@ function Report() {
             navigate("/signin");
           }, 2000);
         }
-        setCP(0)
+        setCP(0);
       }
     } catch (error) {}
   };
 
   useEffect(() => {
-    setTimeout(() => {
-      setLoading(0);
-    }, 3000);
+    setLoading(0);
   }, []);
 
   return (
@@ -110,14 +115,12 @@ function Report() {
                 bgcolor: "grey",
               },
               alignSelf: "flex-end",
-              height: '50px',
-              width: '150px'
+              height: "50px",
+              width: "150px",
             }}
             onClick={handleInput}
           >
-            {
-              CP ? <CircularProgress sx={{ color: 'black' }} /> : 'Report'
-            }
+            {CP ? <CircularProgress sx={{ color: "black" }} /> : "Report"}
           </Button>
         </Box>
       )}

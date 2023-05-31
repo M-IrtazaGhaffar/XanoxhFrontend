@@ -4,6 +4,7 @@ import {
   Box,
   Button,
   CircularProgress,
+  Divider,
   Snackbar,
   TextField,
   Typography,
@@ -13,15 +14,23 @@ import React from "react";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { URL1 } from "../Config";
 
 function Returns() {
   const dispatch = useDispatch();
   const [Data, setData] = useState({
-    id: "",
+    _id: "",
     clientName: "",
     clientNumber: "",
     address: "",
     dateOrdered: "",
+    returnStatus: false,
+    returnDate: null,
+    returnDeliveredDate: null,
+    returnDeliveredStatus: false,
+    returnSentBackStatus: false,
+    returnSentBackDate: null,
+    returnDesc: "",
   });
   const navigate = useNavigate();
   const { token, marketerid } = useSelector((state) => state.checkToken);
@@ -48,14 +57,17 @@ function Returns() {
         setCP(0);
         return;
       }
-      const fetch = await axios.post("", {
-        ClothID: "",
-        id: marketerid,
-        token: token,
-      });
+      const fetch = await axios.post(
+        `${URL1}/checkReturn`,
+        {
+          id: ClothID,
+          token: token,
+        }
+      );
       if (fetch.status === 200) {
         setCP(0);
-        setData(fetch.data);
+        setData(...fetch.data);
+        console.log(Data);
       } else if (fetch.status === 203) {
         setErrData(fetch.data);
         setError(1);
@@ -72,7 +84,7 @@ function Returns() {
         setCP(0);
       }
     } catch (error) {
-      setErrData(error.response.data);
+      setErrData("Network Error");
       setError(1);
       setCP(0);
     }
@@ -87,12 +99,14 @@ function Returns() {
         setCP1(0);
         return;
       }
-      const fetch = await axios.post("", {
-        ClothID: "",
-        desc: Desc,
-        id: marketerid,
-        token: token,
-      });
+      const fetch = await axios.post(
+        `${URL1}/makeReturn`,
+        {
+          id: ClothID,
+          desc: Desc,
+          token: token,
+        }
+      );
       if (fetch.status === 200) {
         setCP1(0);
         setOpen(1);
@@ -107,12 +121,12 @@ function Returns() {
           navigate("/signin");
         }, 2000);
       } else {
-        setErrData(fetch.data);
+        setErrData("Network Error");
         setError(1);
         setCP1(0);
       }
     } catch (error) {
-      setErrData(error.response.data);
+      setErrData("Neywork Error");
       setError(1);
       setCP1(0);
     }
@@ -127,15 +141,17 @@ function Returns() {
           </Alert>
         </Snackbar>
         <Snackbar open={Open} onClose={handleClick1}>
-          <Alert onClose={() => {}} onClick={handleClick1} severity="error">
+          <Alert onClose={() => {}} onClick={handleClick1} severity="success">
             <AlertTitle>Success</AlertTitle>
-            Return Submitted — <strong>Be careful!</strong>
+            Return Submitted — <strong>Wait for Confirmation!</strong>
           </Alert>
         </Snackbar>
         <Box mb={2}>
-            <Typography>
-                Note: Make sure that if the return is made before then you cannot proceed further. So, please first check that whether the Return is made or not before continuing. Thankyou.
-            </Typography>
+          <Typography>
+            Note: Make sure that if the return is made before then you cannot
+            proceed further. So, please first check that whether the Return is
+            made or not before continuing. Thankyou.
+          </Typography>
         </Box>
         <TextField
           name="clothid"
@@ -151,7 +167,7 @@ function Returns() {
               bgcolor: "grey",
             },
             height: "60px",
-            width: '150px'
+            width: "150px",
           }}
           onClick={fetchOrder}
         >
@@ -162,51 +178,136 @@ function Returns() {
           )}
         </Button>
 
-        {Data.id === "" ? (
+        {Data._id === "" ? (
           ""
         ) : (
           <Box>
-            <Box pt={2}>
-              <strong>Order ID</strong> - {Data.id}
-              <br />
-              <strong>Client</strong> - {Data.clientName}
-              <br />
-              <strong>Number</strong> - {Data.clientNumber}
-              <br />
-              <strong>Date Ordered</strong> - {Data.dateOrdered}
-            </Box>
-            <TextField
-              id="outlined-multiline-static"
-              name="desc"
-              placeholder="Description and Details about Package"
-              multiline
-              rows={4}
-              style={{
-                width: "100%",
-                margin: "20px 0 0 0",
-                resize: "none",
-              }}
-              onChange={(e) => setDesc(e.target.value)}
-            />
-            <Button
-              variant="contained"
+            <Box
               sx={{
-                mt: 2,
-                bgcolor: "gray",
-                ":hover": {
-                  bgcolor: "grey",
+                pt: 5,
+                px: {
+                  md: 3,
+                  lg: 5,
                 },
-                height: "60px",
-                width: '150px'
               }}
-              onClick={fetchOrder}
+              display="flex"
+              gap={2}
+              flexDirection="column"
             >
-              {CP1 ? (
-                <CircularProgress sx={{ color: "black", p: "5px" }} />
+              <Typography display="flex" justifyContent="space-between">
+                <Typography>Order ID</Typography> {Data._id}
+              </Typography>
+              <Divider />
+              <Typography display="flex" justifyContent="space-between">
+                <Typography>Client</Typography> {Data.clientName}
+              </Typography>
+              <Divider />
+              <Typography display="flex" justifyContent="space-between">
+                <Typography>Number</Typography> {Data.clientNumber}
+              </Typography>
+              <Divider />
+              <Typography display="flex" justifyContent="space-between">
+                <Typography>Date Ordered</Typography>{" "}
+                {Data.dateOrdered.split("T")[0]}
+              </Typography>
+              <Divider />
+              <Typography display="flex" justifyContent="space-between">
+                <Typography>Address</Typography> {Data.address}
+              </Typography>
+              <Divider />
+              <Typography display="flex" justifyContent="space-between">
+                <Typography>Return Status</Typography>{" "}
+                {Data.returnStatus ? "Applied for Return" : "Not Returned"}
+              </Typography>
+
+              {Data.returnStatus ? (
+                <>
+                  <Divider />
+                  <Typography display="flex" justifyContent="space-between">
+                    <Typography>Return Date</Typography>{" "}
+                    {Data.returnDate.split("T")[0]}
+                  </Typography>
+                  <Divider />
+                  <Typography display="flex" justifyContent="space-between">
+                    <Typography>Return Description</Typography>{" "}
+                    {Data.returnDesc}
+                  </Typography>
+                  <Divider />
+                  <Typography display="flex" justifyContent="space-between">
+                    <Typography>Return Delivered Status</Typography>{" "}
+                    {Data.returnDeliveredStatus ? "Delivered" : "Not Delivered"}
+                  </Typography>
+                  {Data.returnDeliveredStatus ? (
+                    <>
+                      <Divider />
+                      <Typography display="flex" justifyContent="space-between">
+                        <Typography>Return Delivered Date</Typography>{" "}
+                        {Data.returnDeliveredDate.split("T")[0]}
+                      </Typography>
+                    </>
+                  ) : (
+                    ""
+                  )}
+                  <Divider />
+                  <Typography display="flex" justifyContent="space-between">
+                    <Typography>Return Sent Status</Typography>{" "}
+                    {Data.returnSentBackStatus ? "Sent Back" : "Not Sent Back"}
+                  </Typography>
+
+                  {Data.returnSentBackStatus ? (
+                    <>
+                      <Divider />
+                      <Typography display="flex" justifyContent="space-between">
+                        <Typography>Return Sent Date</Typography>{" "}
+                        {Data.returnSentBackDate.split("T")[0]}
+                      </Typography>
+                    </>
+                  ) : (
+                    ""
+                  )}
+                </>
               ) : (
-                "Make Return"
+                ""
               )}
-            </Button>
+            </Box>
+            {Data.returnStatus ? (
+                    ""
+                  ) : (
+                    <Box>
+                      <TextField
+                        id="outlined-multiline-static"
+                        name="desc"
+                        placeholder="Description and Details about Package"
+                        multiline
+                        rows={4}
+                        style={{
+                          width: "100%",
+                          margin: "20px 0 0 0",
+                          resize: "none",
+                        }}
+                        onChange={(e) => setDesc(e.target.value)}
+                      />
+                      <Button
+                        variant="contained"
+                        sx={{
+                          mt: 2,
+                          bgcolor: "gray",
+                          ":hover": {
+                            bgcolor: "grey",
+                          },
+                          height: "60px",
+                          width: "150px",
+                        }}
+                        onClick={createReturn}
+                      >
+                        {CP1 ? (
+                          <CircularProgress sx={{ color: "black", p: "5px" }} />
+                        ) : (
+                          "Make Return"
+                        )}
+                      </Button>
+                    </Box>
+                   )}
           </Box>
         )}
       </Box>

@@ -65,20 +65,16 @@ function ResponsiveDrawer(props) {
             name: "Status",
           },
           {
+            route: "return",
+            name: "Make a Return",
+          },
+          {
             route: "email",
             name: "Contact Us",
           },
           {
             route: "report",
             name: "Report a Problem",
-          },
-          {
-            route: "return",
-            name: "Make a Return",
-          },
-          {
-            route: "checkreturn",
-            name: "Check Return",
           },
         ].map((text, index) => (
           <ListItem

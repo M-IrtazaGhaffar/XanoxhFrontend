@@ -21,6 +21,7 @@ function Email() {
   const [Loading, setLoading] = useState(1);
   const [CP, setCP] = useState(0);
   const [Open, setOpen] = useState(0);
+  const [Submitted, setSubmitted] = useState(0);
   const [Err, setErr] = useState(0);
   const [ErrMsg, setErrMsg] = useState("");
   const handleClick = () => {
@@ -32,6 +33,11 @@ function Email() {
 
   const handleSubmit = async (event) => {
     try {
+      if (Submitted) {
+        setErrMsg("Already Submitted! Try or Reload again!");
+        setErr(1);
+        return;
+      }
       event.preventDefault();
       const data = new FormData(event.currentTarget);
       const name = data.get("name");
@@ -52,6 +58,7 @@ function Email() {
         });
         if (fetch.status === 200) {
           setOpen(1);
+          setSubmitted(1);
         } else {
           setErrMsg(fetch.data);
           setErr(1);
@@ -60,14 +67,12 @@ function Email() {
       }
     } catch (error) {
       setErr(1);
-      setErrMsg(error.message);
+      setErrMsg("Network Error");
     }
   };
 
   useEffect(() => {
-    setTimeout(() => {
-      setLoading(0);
-    }, 2000);
+    setLoading(0);
   }, []);
 
   return (
